@@ -1,9 +1,15 @@
 package com.github.lemniscate.spring.crud.mapping;
 
+import com.github.lemniscate.spring.crud.annotation.AssembleWith;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -16,10 +22,21 @@ import java.util.Map;
 import java.util.Set;
 
 // TODO find a way to make this work with controller mappings
+@Slf4j
 public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMapping implements
         ApplicationContextAware {
 
     private Collection<? extends ApiResourceHandlerMapping> endpoints;
+
+    @Getter
+    private MultiValueMap<Class<?>, PathPropertyMapping> assembleWith = new LinkedMultiValueMap();
+
+    @Getter @RequiredArgsConstructor
+    public static class PathPropertyMapping{
+        private final String property;
+        private final Class<?> controller;
+        private final Method method;
+    }
 
     @Getter
     private Map<Class<?>, String> paths = new HashMap<Class<?>, String>();
@@ -89,6 +106,18 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
                 i++;
             }
         }
+
+        AssembleWith a = AnnotationUtils.findAnnotation(method, AssembleWith.class);
+        if( a != null ){
+            String property = a.value();
+            Class<?> domain = a.domainClass();
+            // TODO look it up automagically from controller?
+
+            for(String pattern : patterns){
+                this.assembleWith.add(domain, new PathPropertyMapping(property, handler.getClass(), method));
+            }
+        }
+
         PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
 
         RequestMappingInfo modified = new RequestMappingInfo(patternsInfo,

@@ -16,6 +16,7 @@ import org.springframework.web.util.UriTemplate;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 
 public class ApiResourceLinkBuilderFactory extends ControllerLinkBuilderFactory {
 
@@ -23,6 +24,22 @@ public class ApiResourceLinkBuilderFactory extends ControllerLinkBuilderFactory 
 
     @Inject
     private ApiResourceControllerHandlerMapping handlerMapping;
+
+    public ApiResourceLinkBuilder linkToNestedResource(Class<?> controller, Method method, Class<?> entity, Object... parameters) {
+
+        ApiResourceLinkBuilder builder = new ApiResourceLinkBuilder(getBuilder());
+        String mapping = DISCOVERER.getMapping(controller);
+
+        String uri = mapping == null ? "" : mapping;
+        uri += handlerMapping.getApiPrefix()
+                + handlerMapping.getPaths().get(entity)
+                + "/"
+                + DISCOVERER.getMapping(controller, method);
+
+        UriTemplate template = new UriTemplate(uri);
+
+        return builder.slash(template.expand(parameters));
+    }
 
     public ApiResourceLinkBuilder linkTo(Class<?> controller, Class<?> entity, Object... parameters) {
 

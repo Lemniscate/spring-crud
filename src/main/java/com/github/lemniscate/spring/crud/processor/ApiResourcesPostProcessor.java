@@ -111,7 +111,7 @@ public class ApiResourcesPostProcessor implements
                 Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceController.class, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
-                        .addPropertyValue("mapping", mapping)
+                        .addConstructorArgValue(mapping)
                         .getBeanDefinition();
                 registry.registerBeanDefinition( name, def);
                 details.controller = def;

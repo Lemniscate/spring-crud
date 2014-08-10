@@ -1,13 +1,11 @@
 package com.github.lemniscate.spring.crud.web.assembler;
 
+import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMapping;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.Identifiable;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -15,8 +13,10 @@ import org.springframework.util.Assert;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Transactional
 public class ApiResourceAssembler<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
@@ -27,6 +27,12 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
 
     @Getter @Setter
     protected ApiResourceMapping<ID, E, CB, RB, UB> mapping;
+
+    @Inject
+    protected ApiResourceControllerHandlerMapping handlerMapping;
+
+    @Inject
+    protected ApiResourceLinkBuilderFactory factory;
 
     public ApiResourceAssembler() {
         super( determineParam(3, 3), (Class<Resource<RB>>) (Class<?>) Resource.class);
@@ -52,6 +58,14 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
     public void addLinks(Collection<Link> links, RB bean) {
 //        AssemblerFieldHelper helper = new AssemblerFieldHelper(beanLinks, arLinkBuilder, beanLookup, links, bean);
 //        ReflectionUtils.doWithFields(bean.getClass(), helper, helper);
+
+        List<ApiResourceControllerHandlerMapping.PathPropertyMapping> list = handlerMapping.getAssembleWith().get(mapping.domainClass());
+        for( ApiResourceControllerHandlerMapping.PathPropertyMapping m : list){
+            ApiResourceLinkBuilder builder = factory.linkToNestedResource( m.getController(), m.getMethod(), mapping.domainClass(), bean.getId());
+            Link link = new Link( builder.toString(), m.getProperty());
+            links.add(link);
+        }
+
     }
 
 

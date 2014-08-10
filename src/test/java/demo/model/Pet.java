@@ -9,7 +9,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@ApiResource
+@ApiResource(omitController = true)
 @Getter @Setter
 public class Pet implements Model<Long> {
 

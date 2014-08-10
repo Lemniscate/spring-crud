@@ -4,6 +4,7 @@ import com.github.lemniscate.spring.crud.annotation.EnableApiResources;
 import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
+import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import demo.model.Organization;
 import demo.model.Pet;
 import demo.model.User;
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
@@ -54,6 +56,9 @@ public class DummyTest {
     @Inject
     private ApiResourceController<Long, User, User, User, User> userController;
 
+    @Inject
+    private ApiResourceAssembler<Long, User, User, User, User> userAssembler;
+
     @Test
     public void foo(){
         System.out.println(ctx);
@@ -66,6 +71,7 @@ public class DummyTest {
     @EnableApiResources(value = User.class)
     @Import(DefaultConfig.class)
     @EnableJpaRepositories(basePackages = {"demo.repo"})
+    @ComponentScan(basePackages = "demo")
     public static class Config{
 
     }
