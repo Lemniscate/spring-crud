@@ -38,7 +38,7 @@ public class ApiResourceUtil {
                 updateBeanClass = domainClass;
             }
 
-            ApiResourceMapping<ID, E, CB, RB, UB> result = new ApiResourceMapping.ComplexApiResourceMapping(idClass, domainClass, createBeanClass, readBeanClass, updateBeanClass);
+            ApiResourceMapping<ID, E, CB, RB, UB> result = new ApiResourceMapping.ComplexApiResourceMapping(idClass, domainClass, createBeanClass, readBeanClass, updateBeanClass, a.omitController());
             return result;
         }
         return null;

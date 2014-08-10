@@ -62,11 +62,13 @@ public class ApiResourcesPostProcessor implements
 
             generateBeansForEntity(registry, entity);
 
-            AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(ApiResourceHandlerMapping.class)
-                        .addConstructorArgValue( wrapper  )
-                        .addConstructorArgReference(entity.getSimpleName() + "Controller")
-                    .getBeanDefinition();
-            registry.registerBeanDefinition( entity.getSimpleName() + "ResourceHandlerMapping", def);
+            if( !wrapper.omitController() ){
+                AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(ApiResourceHandlerMapping.class)
+                            .addConstructorArgValue( wrapper  )
+                            .addConstructorArgReference(entity.getSimpleName() + "Controller")
+                        .getBeanDefinition();
+                registry.registerBeanDefinition( entity.getSimpleName() + "ResourceHandlerMapping", def);
+            }
         }
     }
 
@@ -102,15 +104,19 @@ public class ApiResourcesPostProcessor implements
         }
 
         if( details.controller == null ){
-            String name = entity.getSimpleName() + "Controller";
-            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceController.class, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            if( mapping.omitController() ){
+                log.info("Ignored controller for {}", entity.getSimpleName());
+            }else{
+                String name = entity.getSimpleName() + "Controller";
+                Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceController.class, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
-            AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
-                    .addPropertyValue("mapping", mapping)
-                    .getBeanDefinition();
-            registry.registerBeanDefinition( name, def);
-            details.controller = def;
-            log.info("Generated controller for {}", entity.getSimpleName());
+                AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
+                        .addPropertyValue("mapping", mapping)
+                        .getBeanDefinition();
+                registry.registerBeanDefinition( name, def);
+                details.controller = def;
+                log.info("Generated controller for {}", entity.getSimpleName());
+            }
         }else{
             log.info("Found controller for {}", entity.getSimpleName());
             String name = entity.getSimpleName() + "Controller";

@@ -16,6 +16,6 @@ public @interface ApiResource {
     Class<?> readBeanClass() default Object.class;
     Class<?> updateBeanClass() default Object.class;
     String path() default "";
-
+    boolean omitController() default false;
 
 }

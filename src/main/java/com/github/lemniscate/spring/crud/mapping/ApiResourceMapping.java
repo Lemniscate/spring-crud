@@ -17,20 +17,23 @@ public interface ApiResourceMapping<ID extends Serializable, E extends Identifia
     Class<RB> readBeanClass();
     Class<UB> updateBeanClass();
     String path();
+    boolean omitController();
 
     public static class SimpleApiResourceMapping<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
         implements ApiResourceMapping<ID, E, CB, RB, UB>{
 
         private final Class<ID> idClass;
         private final Class<E> domainClass;
+        private final boolean omitController;
 
         @Setter
         private String path;
 
-        public SimpleApiResourceMapping(Class<ID> idClass, Class<E> domainClass) {
+        public SimpleApiResourceMapping(Class<ID> idClass, Class<E> domainClass, boolean omitController) {
             this.idClass = idClass;
             this.domainClass = domainClass;
             this.path = ApiResourceUtil.getPath(domainClass);
+            this.omitController = omitController;
         }
 
         @Override
@@ -62,6 +65,11 @@ public interface ApiResourceMapping<ID extends Serializable, E extends Identifia
         public String path() {
             return path;
         }
+
+        @Override
+        public boolean omitController() {
+            return omitController;
+        }
     }
 
     public static class ComplexApiResourceMapping<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
@@ -72,11 +80,12 @@ public interface ApiResourceMapping<ID extends Serializable, E extends Identifia
         private final Class<CB> createBeanClass;
         private final Class<RB> readBeanClass;
         private final Class<UB> updateBeanClass;
+        private final boolean omitController;
 
         @Setter
-        private final String path;
+        private String path;
 
-        public ComplexApiResourceMapping(Class<ID> idClass, Class<E> domainClass, Class<CB> createBeanClass, Class<RB> readBeanClass, Class<UB> updateBeanClass) {
+        public ComplexApiResourceMapping(Class<ID> idClass, Class<E> domainClass, Class<CB> createBeanClass, Class<RB> readBeanClass, Class<UB> updateBeanClass, boolean omitController) {
             this.idClass = idClass;
             this.domainClass = domainClass;
             this.createBeanClass = createBeanClass;
@@ -84,6 +93,7 @@ public interface ApiResourceMapping<ID extends Serializable, E extends Identifia
             this.updateBeanClass = updateBeanClass;
 
             this.path = ApiResourceUtil.getPath(domainClass);
+            this.omitController = omitController;
         }
 
         @Override
@@ -114,6 +124,11 @@ public interface ApiResourceMapping<ID extends Serializable, E extends Identifia
         @Override
         public String path() {
             return path;
+        }
+
+        @Override
+        public boolean omitController() {
+            return omitController;
         }
     }
 
