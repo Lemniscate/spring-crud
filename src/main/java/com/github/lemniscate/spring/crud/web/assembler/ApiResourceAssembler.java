@@ -4,6 +4,7 @@ import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMap
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 @Transactional
 public class ApiResourceAssembler<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
         extends ResourceAssemblerSupport<RB, Resource<RB>> {
@@ -50,8 +52,12 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
      * so implementations can customize links.
      */
     private void doAddLinks(Collection<Link> links, RB bean) {
-        Link link = entityLinks.linkToSingleResource(bean).withSelfRel();
-        links.add(link);
+        if( mapping.omitController() ){
+            log.warn("Unable to provide 'self' link for nested entity " + mapping.domainClass().getSimpleName());
+        }else{
+            Link link = entityLinks.linkToSingleResource(bean).withSelfRel();
+            links.add(link);
+        }
         addLinks(links, bean);
     }
 
@@ -60,12 +66,13 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
 //        ReflectionUtils.doWithFields(bean.getClass(), helper, helper);
 
         List<ApiResourceControllerHandlerMapping.PathPropertyMapping> list = handlerMapping.getAssembleWith().get(mapping.domainClass());
-        for( ApiResourceControllerHandlerMapping.PathPropertyMapping m : list){
-            ApiResourceLinkBuilder builder = factory.linkToNestedResource( m.getController(), m.getMethod(), mapping.domainClass(), bean.getId());
-            Link link = new Link( builder.toString(), m.getProperty());
-            links.add(link);
+        if( list != null ){
+            for( ApiResourceControllerHandlerMapping.PathPropertyMapping m : list){
+                ApiResourceLinkBuilder builder = factory.linkToNestedResource( m.getController(), m.getMethod(), mapping.domainClass(), bean.getId());
+                Link link = new Link( builder.toString(), m.getProperty());
+                links.add(link);
+            }
         }
-
     }
 
 

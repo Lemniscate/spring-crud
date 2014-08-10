@@ -22,6 +22,8 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
 
     Page<RB> queryForRead(MultiValueMap<String, String> params, Pageable p);
 
+    E save(E entity);
+
     E create(CB bean);
 
     RB createForRead(CB bean);

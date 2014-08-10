@@ -83,6 +83,11 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     }
 
     @Override
+    public E save(E entity) {
+        return repo.save(entity);
+    }
+
+    @Override
     public E create(CB bean){
         E entity = conversionService.convert(bean, mapping.domainClass());
         E result = repo.save(entity);
