@@ -1,10 +1,12 @@
 package com.github.lemniscate.spring.crud.web;
 
+import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -47,22 +50,10 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     public ApiResourceController(ApiResourceMapping<ID, E, CB, RB, UB> mapping) {
         this.mapping = mapping;
     }
-//
-//    public ApiResourceController() {
-//        this((ApiResourceMapping<ID, E, CB, RB, UB>) generateMapping());
-//    }
-//
-//    private static <ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB> ApiResourceMapping.ComplexApiResourceMapping<ID, E, CB, RB, UB> generateMapping(){
-//        int index = 4;
-//        Class<ID> id = (Class<ID>) determineParam(index, 0);
-//        Class<E> domain = (Class<E>) determineParam(index, 1);
-//        Class<CB> cb = (Class<CB>) determineParam(index, 2);
-//        Class<RB> rb = (Class<RB>) determineParam(index, 3);
-//        Class<UB> ub = (Class<UB>) determineParam(index, 4);
-//
-//        ApiResourceMapping.ComplexApiResourceMapping<ID, E, CB, RB, UB> result = new ApiResourceMapping.ComplexApiResourceMapping<ID, E, CB, RB, UB>(id, domain, cb, rb, ub, false);
-//        return result;
-//    }
+
+    public ApiResourceController() {
+        this((ApiResourceMapping<ID, E, CB, RB, UB>) ApiResourceUtil.generateMapping(3, ApiResourceController.class));
+    }
 
     @RequestMapping(value="", method= RequestMethod.GET)
     public ResponseEntity<Page<Resource<RB>>> getAll(@RequestParam MultiValueMap<String, String> params, Pageable p){
@@ -120,18 +111,5 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
 //    }
 
 
-    // Shield your eyes: this nastiness gets us to have default constructors for concrete Assemblers.
-    private static Class<?>  determineParam(int callStackIndex, int paramIndex){
-        try {
-            StackTraceElement[] st = Thread.currentThread().getStackTrace();
-            Assert.isTrue(st.length >= callStackIndex, "CallStack didn't contain enough elements");
-            // the fourth entry should be our concrete class (unless we have some base-classes... crap)
-            String name = st[callStackIndex].getClassName();
-            Class<?> clazz = Class.forName(name);
-            Type result = GenericTypeResolver.resolveTypeArguments(clazz, ApiResourceController.class)[paramIndex];
-            return result.getClass();
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
+
 }

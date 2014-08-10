@@ -2,6 +2,7 @@ package com.github.lemniscate.spring.crud.svc;
 
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
+import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,14 +20,23 @@ import java.util.List;
 public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
         implements ApiResourceService<ID,E,CB,RB,UB> {
 
-    @Getter @Setter
-    protected ApiResourceMapping<ID, E, CB, RB, UB> mapping;
+    @Getter
+    protected final ApiResourceMapping<ID, E, CB, RB, UB> mapping;
 
     @Inject
     protected ApiResourceRepository<ID, E> repo;
 
     @Inject
     protected ConversionService conversionService;
+
+    @Inject
+    public ApiResourceServiceImpl(ApiResourceMapping<ID, E, CB, RB, UB> mapping) {
+        this.mapping = mapping;
+    }
+
+    public ApiResourceServiceImpl() {
+        this((ApiResourceMapping<ID, E, CB, RB, UB>) ApiResourceUtil.generateMapping(3, ApiResourceService.class));
+    }
 
     @Override
     public E findOne(ID id){

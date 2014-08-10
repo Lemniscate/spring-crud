@@ -28,9 +28,9 @@ public class UserController extends ApiResourceController<Long, User, User, User
     @Inject
     private ApiResourceAssembler<Long, Pet, Pet, Pet, Pet> petAssembler;
 
-    public UserController() {
-        super( ApiResourceUtil.<Long, User, User, User, User> from(User.class) );
-    }
+//    public UserController() {
+//        super( ApiResourceUtil.<Long, User, User, User, User> from(User.class) );
+//    }
 
     @AssembleWith(value = "pets", domainClass = User.class)
     @RequestMapping(value="/{parentId}/pets", method= RequestMethod.GET)
