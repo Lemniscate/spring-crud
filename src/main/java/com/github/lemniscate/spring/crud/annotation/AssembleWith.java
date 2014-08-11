@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface AssembleWith {
     String value();
-    Class<?> domainClass(); // default Object.class;
+    Class<?> domainClass() default Object.class;
 }

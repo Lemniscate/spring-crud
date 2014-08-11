@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -111,7 +113,12 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
         if( a != null ){
             String property = a.value();
             Class<?> domain = a.domainClass();
-            // TODO look it up automagically from controller?
+            if( Object.class.equals(domain) ){
+                Class<?>[] types = GenericTypeResolver.resolveTypeArguments(handler.getClass(), ApiResourceController.class);
+                Assert.notNull(types, "Could not resolve generic ApiResourceController types from " + handler.getClass().getSimpleName());
+                Assert.isTrue(types.length >= 1, "Could not resolve generic ApiResourceController types from " + handler.getClass().getSimpleName());
+                domain = types[1];
+            }
 
             for(String pattern : patterns){
                 this.assembleWith.add(domain, new PathPropertyMapping(property, handler.getClass(), method));
