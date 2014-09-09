@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @Author dave 8/8/14 9:20 PM
@@ -100,15 +101,14 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
         return mapping;
     }
 
-    // TODO implement searches
-//    @RequestMapping(value="/searches", method=RequestMethod.POST)
-//    public ResponseEntity<Page<Resource<RB>>> search(@RequestBody Map<String, Object> search, Pageable pageable){
-//        Page<RB> entities = service.search(search, pageable);
-//        List<Resource<RB>> resources = assembler.toResources(entities.getContent());
-//        Page<Resource<RB>> pagedResources = new PageImpl<Resource<RB>>(resources, pageable, entities.getTotalElements());
-//        ResponseEntity<Page<Resource<RB>>> response = new ResponseEntity<Page<Resource<RB>>>(pagedResources, HttpStatus.OK);
-//        return response;
-//    }
+    @RequestMapping(value="/searches", method=RequestMethod.POST)
+    public ResponseEntity<Page<Resource<RB>>> search(@RequestBody Map<String, Object> search, Pageable pageable){
+        Page<RB> entities = service.searchForRead(search, pageable);
+        List<Resource<RB>> resources = assembler.toResources(entities.getContent());
+        Page<Resource<RB>> pagedResources = new PageImpl<Resource<RB>>(resources, pageable, entities.getTotalElements());
+        ResponseEntity<Page<Resource<RB>>> response = new ResponseEntity<Page<Resource<RB>>>(pagedResources, HttpStatus.OK);
+        return response;
+    }
 
 
 

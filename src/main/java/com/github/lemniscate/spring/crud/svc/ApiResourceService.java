@@ -6,6 +6,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.util.MultiValueMap;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @Author dave 8/8/14 9:52 PM
@@ -38,6 +39,6 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
 
     void delete(E entity);
 
-
-
+    Page<E> search(Map<String, Object> search, Pageable pageable);
+    Page<RB> searchForRead(Map<String, Object> search, Pageable pageable);
 }
