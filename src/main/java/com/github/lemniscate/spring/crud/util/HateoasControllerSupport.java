@@ -9,25 +9,26 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class HateoasControllerSupport<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB> {
 
     protected final ApiResourceAssembler<ID, E, CB, RB, UB> assembler;
+
+    public HateoasControllerSupport(ApiResourceAssembler<ID, E, CB, RB, UB> assembler) {
+        Assert.notNull(assembler, "Parameter 'assembler' cannot be null");
+        this.assembler = assembler;
+    }
 
     public ResponseEntity<Resource<RB>> toResponse(RB entity) {
         return HateoasControllerSupport.toResponse(assembler, entity);
     };
 
     public ResponseEntity<Page<Resource<RB>>> toResponse(Page<RB> entities, Pageable pageInfo) {
-        List<RB> content = entities.getContent();
-        List<Resource<RB>> resources = assembler.toResources(content);
-        Page<Resource<RB>> pagedResources = new PageImpl<Resource<RB>>(resources, pageInfo, entities.getTotalElements());
-        ResponseEntity<Page<Resource<RB>>> response = new ResponseEntity<Page<Resource<RB>>>(pagedResources, HttpStatus.OK);
-        return response;
+        return HateoasControllerSupport.toResponse(assembler, entities, pageInfo);
     };
 
     public static <ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB> ResponseEntity<Resource<RB>> toResponse(ApiResourceAssembler<ID, E, CB, RB, UB> assembler, RB entity) {
