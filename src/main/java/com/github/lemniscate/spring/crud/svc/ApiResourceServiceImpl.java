@@ -93,7 +93,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     @Override
     public E create(CB bean){
         E entity = conversionService.convert(bean, mapping.domainClass());
-        E result = repo.save(entity);
+        E result = save(entity);
         return result;
     }
 
@@ -106,7 +106,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
 
     @Override
     public RB read(ID id){
-        E entity = repo.findOne(id);
+        E entity = findOne(id);
         RB result = conversionService.convert(entity, mapping.readBeanClass());
         return result;
     }
@@ -114,7 +114,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     @Override
     public E update(UB bean){
         E entity = conversionService.convert(bean, mapping.domainClass());
-        E result = repo.save(entity);
+        E result = save(entity);
         return result;
     }
 

@@ -14,6 +14,7 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import netscape.security.ParameterizedTarget;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
@@ -28,6 +29,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +64,9 @@ public class ApiResourcesPostProcessor implements
 
             generateBeansForEntity(registry, entity);
 
-            if( !wrapper.omitController() ){
+            if( wrapper.omitController() ){
+                log.warn("Omitting controller for " + entity);
+            }else{
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(ApiResourceHandlerMapping.class)
                             .addConstructorArgValue( wrapper  )
                             .addConstructorArgReference(entity.getSimpleName() + "Controller")
@@ -78,27 +82,33 @@ public class ApiResourcesPostProcessor implements
         BeanDefinitionDetails details = map.get(entity);
 
         if( details.service == null){
-            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(entity.getSimpleName() + "Service", ApiResourceServiceImpl.class, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            String component = "Service";
+            String name = entity.getSimpleName() + component;
+            Class<?> abstractClass = ApiResourceServiceImpl.class;
+            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                     .addConstructorArgValue(mapping)
                     .getBeanDefinition();
-            registry.registerBeanDefinition( entity.getSimpleName() + "Service", def);
+            registry.registerBeanDefinition( name, def);
             details.service = def;
-            log.info("Generated service for {}", entity.getSimpleName());
+            log.info("Generated {} for {}. Generic signature: {}", component, entity.getSimpleName(), GenericTypeResolver.resolveTypeArguments(serviceClass, abstractClass));
         }else{
             log.info("Found service for {}", entity.getSimpleName());
         }
 
         if( details.repository == null ){
-            Class<?> repoClass = JavassistUtil.generateTypedInterface(entity.getSimpleName() + "Repository", ApiResourceRepository.class, mapping.idClass(), mapping.domainClass());
+            String component = "Repository";
+            String name = entity.getSimpleName() + component;
+            Class<?> abstractClass = ApiResourceRepository.class;
+            Class<?> serviceClass = JavassistUtil.generateTypedInterface(name, abstractClass, mapping.idClass(), mapping.domainClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(JpaRepositoryFactoryBean.class)
-                    .addPropertyValue("repositoryInterface", repoClass)
+                    .addPropertyValue("repositoryInterface", serviceClass)
                     .getBeanDefinition();
             registry.registerBeanDefinition( entity.getSimpleName() + "Repository", def);
             details.repository = def;
-            log.info("Generated repository for {}", entity.getSimpleName());
+            log.info("Generated {} for {}. Generic signature: {}", component, entity.getSimpleName(), GenericTypeResolver.resolveTypeArguments(serviceClass, abstractClass));
         }else{
             log.info("Found repository for {}", entity.getSimpleName());
         }
@@ -107,15 +117,17 @@ public class ApiResourcesPostProcessor implements
             if( mapping.omitController() ){
                 log.info("Ignored controller for {}", entity.getSimpleName());
             }else{
-                String name = entity.getSimpleName() + "Controller";
-                Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceController.class, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+                String component = "Controller";
+                String name = entity.getSimpleName() + component;
+                Class<?> abstractClass = ApiResourceController.class;
+                Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                         .addConstructorArgValue(mapping)
                         .getBeanDefinition();
                 registry.registerBeanDefinition( name, def);
                 details.controller = def;
-                log.info("Generated controller for {}", entity.getSimpleName());
+                log.info("Generated {} for {}. Generic signature: {}", component, entity.getSimpleName(), GenericTypeResolver.resolveTypeArguments(serviceClass, abstractClass));
             }
         }else{
             log.info("Found controller for {}", entity.getSimpleName());
@@ -125,15 +137,17 @@ public class ApiResourcesPostProcessor implements
 
         if( details.assembler == null){
 
-            String name = entity.getSimpleName() + "Assembler";
-            Class<?>  serviceClass = JavassistUtil.generateTypedSubclass(name, ApiResourceAssembler.class, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            String component = "Assembler";
+            String name = entity.getSimpleName() + component;
+            Class<?> abstractClass = ApiResourceAssembler.class;
+            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                     .addPropertyValue("mapping", mapping)
                     .getBeanDefinition();
             registry.registerBeanDefinition( name, def);
             details.assembler = def;
-            log.info("Generated assembler for {}", entity.getSimpleName());
+            log.info("Generated {} for {}. Generic signature: {}", component, entity.getSimpleName(), GenericTypeResolver.resolveTypeArguments(serviceClass, abstractClass));
         }else{
             log.info("Found assembler for {}", entity.getSimpleName());
         }
