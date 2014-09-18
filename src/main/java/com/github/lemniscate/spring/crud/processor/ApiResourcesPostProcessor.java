@@ -1,6 +1,5 @@
 package com.github.lemniscate.spring.crud.processor;
 
-import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceHandlerMapping;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
@@ -8,13 +7,13 @@ import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.svc.ApiResourceServiceImpl;
 import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
+import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.util.bytecode.JavassistUtil;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import netscape.security.ParameterizedTarget;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
@@ -29,7 +28,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
