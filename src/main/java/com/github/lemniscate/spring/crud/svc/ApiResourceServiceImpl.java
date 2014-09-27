@@ -1,5 +1,6 @@
 package com.github.lemniscate.spring.crud.svc;
 
+import com.github.lemniscate.spring.crud.lifecycle.ApiResourceLifecycleListener;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
 import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
@@ -7,6 +8,7 @@ import com.github.lemniscate.spring.search.OperationParser;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,6 +33,9 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
 
     @Inject
     protected ConversionService conversionService;
+
+    @Autowired(required=false)
+    private List<ApiResourceLifecycleListener<E>> listeners = Lists.newArrayList();
 
     @Inject
     public ApiResourceServiceImpl(ApiResourceMapping<ID, E, CB, RB, UB> mapping) {
@@ -87,14 +92,36 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
 
     @Override
     public E save(E entity) {
-        return repo.save(entity);
+        E pre = entity;
+        for(ApiResourceLifecycleListener<E> listener : listeners){
+            pre = listener.beforeSave(pre);
+        }
+
+        E saved = repo.save(pre);
+
+        E post = saved;
+        for(ApiResourceLifecycleListener<E> listener : listeners){
+            post = listener.afterSave(post);
+        }
+        return post;
     }
 
     @Override
     public E create(CB bean){
         E entity = conversionService.convert(bean, mapping.domainClass());
-        E result = save(entity);
-        return result;
+
+        E pre = entity;
+        for(ApiResourceLifecycleListener<E> listener : listeners){
+            pre = listener.beforeCreate(pre);
+        }
+
+        E saved = repo.save(pre);
+
+        E post = saved;
+        for(ApiResourceLifecycleListener<E> listener : listeners){
+            post = listener.afterCreate(post);
+        }
+        return post;
     }
 
     @Override
@@ -127,12 +154,22 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
 
     @Override
     public void delete(ID id){
-        repo.delete(id);
+        E entity = findOne(id);
+        delete(entity);
     }
 
     @Override
     public void delete(E entity){
-        delete(entity.getId());
+        E pre = entity;
+        for(ApiResourceLifecycleListener<E> listener : listeners){
+            pre = listener.beforeDelete(pre);
+        }
+
+        repo.delete(pre);
+
+        for(ApiResourceLifecycleListener<E> listener : listeners){
+            listener.afterDelete(entity);
+        }
     }
 
     // TODO use an adapter approach to support multiple SpringData projects?
