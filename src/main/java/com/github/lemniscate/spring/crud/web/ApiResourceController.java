@@ -1,13 +1,10 @@
 package com.github.lemniscate.spring.crud.web;
 
-import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
-import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
+import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
+import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,15 +13,12 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +85,7 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
 
     @RequestMapping(value="/{id}", method=RequestMethod.PUT)
     public ResponseEntity<Resource<RB>> putOne(@PathVariable ID id, @RequestBody UB bean){
-        RB entity = service.updateForRead( bean );
+        RB entity = service.updateForRead( id, bean );
         Resource<RB> resource = assembler.toResource(entity);
         ResponseEntity<Resource<RB>> response = new ResponseEntity<Resource<RB>>(resource, HttpStatus.OK);
         return response;

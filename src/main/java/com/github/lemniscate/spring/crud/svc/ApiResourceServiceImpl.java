@@ -8,6 +8,7 @@ import com.github.lemniscate.spring.search.OperationParser;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,9 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.util.MultiValueMap;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -97,7 +100,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
             pre = listener.beforeSave(pre);
         }
 
-        E saved = repo.save(pre);
+        E saved = doSave(pre);
 
         E post = saved;
         for(ApiResourceLifecycleListener<E> listener : listeners){
@@ -115,13 +118,17 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
             pre = listener.beforeCreate(pre);
         }
 
-        E saved = repo.save(pre);
+        E saved = doSave(pre);
 
         E post = saved;
         for(ApiResourceLifecycleListener<E> listener : listeners){
             post = listener.afterCreate(post);
         }
         return post;
+    }
+
+    protected E doSave(E entity){
+        return repo.save(entity);
     }
 
     @Override
@@ -139,15 +146,21 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     }
 
     @Override
-    public E update(UB bean){
-        E entity = conversionService.convert(bean, mapping.domainClass());
+    public E update(ID id, UB bean){
+        E entity = findOne(id);
+        E copy = conversionService.convert(bean, mapping.domainClass());
+        try {
+            BeanUtils.copyProperties(entity, copy);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed copying properties", e);
+        }
         E result = save(entity);
         return result;
     }
 
     @Override
-    public RB updateForRead(UB bean){
-        E entity = update(bean);
+    public RB updateForRead(ID id, UB bean){
+        E entity = update(id, bean);
         RB result = conversionService.convert(entity, mapping.readBeanClass());
         return result;
     }

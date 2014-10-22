@@ -31,9 +31,9 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
 
     RB read(ID id);
 
-    E update(UB bean);
+    E update(ID id, UB bean);
 
-    RB updateForRead(UB bean);
+    RB updateForRead(ID id, UB bean);
 
     void delete(ID id);
 
