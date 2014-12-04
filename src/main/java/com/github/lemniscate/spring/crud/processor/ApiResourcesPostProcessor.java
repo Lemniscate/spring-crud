@@ -47,9 +47,14 @@ public class ApiResourcesPostProcessor implements
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         try {
+            long start = System.currentTimeMillis();
             populateMap(registry);
+            log.info("Populated map from registry in {} ms", System.currentTimeMillis() - start);
+            long generate = System.currentTimeMillis();
             generateBeans(registry);
-            log.info("Completed generation");
+            log.info("Generated beans in {} ms", System.currentTimeMillis() - generate);
+
+            log.info("Completed ApiResource processing in {} ms (total)", System.currentTimeMillis() - start);
         } catch (Exception e){
             throw new FatalBeanException("Failed generating ApiResources", e);
         }

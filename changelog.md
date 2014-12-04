@@ -1,3 +1,7 @@
+### 0.1.5-SNAPSHOT (pending)
+* Updated to Spring-Search 0.1.5 to fix Between bug
+* Added timing metrics to processor (#8)
+
 ### 0.1.4-SNAPSHOT
 * Bumped javassist-util to 0.1.2 for missing class bugfix
 * Added `@ApiResourceController` to be used instead of `@Controller`
