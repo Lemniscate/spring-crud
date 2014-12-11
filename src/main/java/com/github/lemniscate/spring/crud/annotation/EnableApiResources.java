@@ -1,5 +1,7 @@
 package com.github.lemniscate.spring.crud.annotation;
 
+import com.github.lemniscate.spring.crud.util.ApiResourceRegistry;
+import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceEntityLinks;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceLinkBuilderFactory;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMapping;
@@ -56,6 +58,9 @@ public @interface EnableApiResources {
 
             registry.registerBeanDefinition("apiResourcesLinkBuilderFactory", new RootBeanDefinition(ApiResourceLinkBuilderFactory.class));
             registry.registerBeanDefinition("apiResourcesEntityLinks", new RootBeanDefinition(ApiResourceEntityLinks.class));
+
+            registry.registerBeanDefinition("apiResourceRegistry", new RootBeanDefinition(ApiResourceRegistry.class));
+            registry.registerBeanDefinition("apiResourceAssemblers", new RootBeanDefinition(ApiResourceAssemblers.class));
         }
     }
 }

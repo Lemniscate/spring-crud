@@ -1,4 +1,8 @@
-### 0.1.5-SNAPSHOT (pending)
+### 0.1.6-SNAPSHOT
+* Added `ApiResourceAssemblers` bean to easily marshall objects to responses
+* Added first iteration of `ApiResourceRegistry` bean to easily lookup service-objects (though it only has Assemblers so far)
+
+### 0.1.5-SNAPSHOT
 * Updated to Spring-Search 0.1.5 to fix Between bug
 * Added timing metrics to processor (#8)
 

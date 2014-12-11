@@ -20,14 +20,12 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.*;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +40,6 @@ public class ApiResourcesPostProcessor implements
     private final String basePackage;
     private Set<Class<?>> entities;
     private Map<Class<?>, BeanDefinitionDetails> map = new HashMap<Class<?>, BeanDefinitionDetails>();
-
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -227,7 +224,7 @@ public class ApiResourcesPostProcessor implements
 
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {}
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory bf) throws BeansException {}
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -242,7 +239,7 @@ public class ApiResourcesPostProcessor implements
         return PriorityOrdered.LOWEST_PRECEDENCE - 3;
     }
 
-    private class BeanDefinitionDetails {
+    class BeanDefinitionDetails {
         AbstractBeanDefinition repository, service, controller, assembler;
     }
 
