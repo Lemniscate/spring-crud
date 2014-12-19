@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,10 +56,16 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
         return result;
     }
 
+
     @Override
     public Page<E> find(Pageable p) {
         Page<E> result = repo.findAll(p);
         return result;
+    }
+
+    @Override
+    public List<E> findByIds(Iterable<ID> ids) {
+        return repo.findByIdIn(ids);
     }
 
     @Override
@@ -172,16 +179,36 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     }
 
     @Override
-    public void delete(E entity){
-        E pre = entity;
-        for(ApiResourceLifecycleListener<E> listener : listeners){
-            pre = listener.beforeDelete(pre);
+    public void delete(Iterable<ID> ids) {
+        List<E> entities = findByIds(ids);
+        for(E entity : entities){
+            E pre = entity;
+            for (ApiResourceLifecycleListener<E> listener : listeners) {
+                pre = listener.beforeDelete(pre);
+            }
         }
+        repo.delete(entities);
+        for(E entity : entities){
+            E post = entity;
+            for (ApiResourceLifecycleListener<E> listener : listeners) {
+                listener.afterDelete(post);
+            }
+        }
+    }
 
-        repo.delete(pre);
+    @Override
+    public void delete(E entity){
+        if( entity != null ) {
+            E pre = entity;
+            for (ApiResourceLifecycleListener<E> listener : listeners) {
+                pre = listener.beforeDelete(pre);
+            }
 
-        for(ApiResourceLifecycleListener<E> listener : listeners){
-            listener.afterDelete(entity);
+            repo.delete(pre);
+
+            for (ApiResourceLifecycleListener<E> listener : listeners) {
+                listener.afterDelete(entity);
+            }
         }
     }
 

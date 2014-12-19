@@ -1,3 +1,6 @@
+### 0.1.7-SNAPSHOT
+* Added `delete(Iterable)` and `findByIds(Iterable)` methods 
+
 ### 0.1.6-SNAPSHOT
 * Added `ApiResourceAssemblers` bean to easily marshall objects to responses
 * Added first iteration of `ApiResourceRegistry` bean to easily lookup service-objects (though it only has Assemblers so far)

@@ -6,6 +6,8 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.util.MultiValueMap;
 
 import java.io.Serializable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +25,8 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
 
     Page<RB> queryForRead(MultiValueMap<String, String> params, Pageable p);
 
+    List<E> findByIds(Iterable<ID> ids);
+
     E save(E entity);
 
     E create(CB bean);
@@ -36,6 +40,8 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
     RB updateForRead(ID id, UB bean);
 
     void delete(ID id);
+
+    void delete(Iterable<ID> ids);
 
     void delete(E entity);
 
