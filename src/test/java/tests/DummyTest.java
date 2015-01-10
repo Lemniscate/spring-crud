@@ -3,6 +3,7 @@ package tests;
 import com.github.lemniscate.spring.crud.annotation.EnableApiResources;
 import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
+import com.github.lemniscate.spring.crud.svc.ApiResourceServices;
 import com.github.lemniscate.spring.crud.util.ApiResourceRegistry;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
@@ -85,7 +86,17 @@ public class DummyTest {
 
 
 
+    @Inject
+    private ApiResourceServices services;
 
+    @Test
+    public void initialTests(){
+        User user = services.findOne(User.class, 1L);
+        Assert.notNull(user);
+
+        Page<User> users = services.findForRead(User.class, new PageRequest(0, 100));
+        Assert.notEmpty(users.getContent());
+    }
 
 
 
