@@ -38,6 +38,9 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     @Inject
     protected ConversionService conversionService;
 
+    @Inject
+    protected ApiResourceServices services;
+
     @Autowired(required=false)
     private List<ApiResourceLifecycleListener<E>> listeners = Lists.newArrayList();
 

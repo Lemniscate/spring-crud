@@ -15,6 +15,10 @@ import java.util.Map;
  */
 public interface ApiResourceService<ID extends Serializable, E extends Identifiable<ID>, CB, RB, UB> {
 
+    /* ************************************************************************************************
+     * DEVELOPER NOTE: if you add methods here, add supporting methods to ApiResourceServices as well *
+     * ***********************************************************************************************/
+
     E findOne(ID id);
 
     Page<E> find(Pageable p);
@@ -47,4 +51,9 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
 
     Page<E> search(Map<String, Object> search, Pageable pageable);
     Page<RB> searchForRead(Map<String, Object> search, Pageable pageable);
+
+    /* ************************************************************************************************
+     * DEVELOPER NOTE: if you add methods here, add supporting methods to ApiResourceServices as well *
+     * ***********************************************************************************************/
+
 }

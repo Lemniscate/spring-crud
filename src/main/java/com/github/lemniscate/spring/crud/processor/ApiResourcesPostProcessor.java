@@ -5,9 +5,12 @@ import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.svc.ApiResourceServiceImpl;
+import com.github.lemniscate.spring.crud.svc.ApiResourceServices;
+import com.github.lemniscate.spring.crud.util.ApiResourceRegistry;
 import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
+import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
 import com.github.lemniscate.util.bytecode.JavassistUtil;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
@@ -26,9 +29,7 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -51,11 +52,26 @@ public class ApiResourcesPostProcessor implements
             generateBeans(registry);
             log.info("Generated beans in {} ms", System.currentTimeMillis() - generate);
 
+            generateHelpers(registry);
+
             log.info("Completed ApiResource processing in {} ms (total)", System.currentTimeMillis() - start);
         } catch (Exception e){
             throw new FatalBeanException("Failed generating ApiResources", e);
         }
 
+    }
+
+    private void generateHelpers(BeanDefinitionRegistry registry) {
+        List<ApiResourceMapping> mappings = new ArrayList<ApiResourceMapping>();
+        for( Class<?> c : entities){
+            mappings.add( ApiResourceUtil.from(c) );
+        }
+
+        registry.registerBeanDefinition("apiResourceRegistry", BeanDefinitionBuilder.rootBeanDefinition(ApiResourceRegistry.class)
+            .addConstructorArgValue(mappings)
+            .getBeanDefinition());
+        registry.registerBeanDefinition("apiResourceAssemblers", new RootBeanDefinition(ApiResourceAssemblers.class));
+        registry.registerBeanDefinition("apiResourceServices", new RootBeanDefinition(ApiResourceServices.class));
     }
 
     public void generateBeans(BeanDefinitionRegistry registry) throws NotFoundException, CannotCompileException {

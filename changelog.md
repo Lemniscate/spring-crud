@@ -1,3 +1,6 @@
+### 0.1.8-SNAPSHOT
+* Added `ApiResourceServices` to help dynamically access the framework methods in a typesafe manner.  
+
 ### 0.1.7-SNAPSHOT
 * Added `delete(Iterable)` and `findByIds(Iterable)` methods 
 
