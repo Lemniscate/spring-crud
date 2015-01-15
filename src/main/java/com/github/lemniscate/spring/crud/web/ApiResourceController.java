@@ -2,12 +2,10 @@ package com.github.lemniscate.spring.crud.web;
 
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
-import com.github.lemniscate.spring.crud.svc.ApiResourceServices;
+import com.github.lemniscate.spring.crud.util.ApiResourceSupport;
 import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
-import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
 import lombok.Getter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Identifiable;
@@ -24,25 +22,17 @@ import java.util.Map;
 /**
 * @Author dave 8/8/14 9:20 PM
 */
-public class ApiResourceController<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB> {
+public class ApiResourceController<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
+        extends ApiResourceSupport {
 
     @Inject
     protected ApiResourceService<ID, E, CB, RB, UB> service;
 
     @Inject
-    protected ApiResourceServices services;
-
-    @Inject
     protected ApiResourceAssembler<ID, E, CB, RB, UB> assembler;
-
-    @Inject
-    protected ApiResourceAssemblers assemblers;
 
     @Getter
     protected final ApiResourceMapping<ID, E, CB, RB, UB> mapping;
-
-    @Inject
-    protected ConversionService conversionService;
 
     @Inject
     public ApiResourceController(ApiResourceMapping<ID, E, CB, RB, UB> mapping) {
