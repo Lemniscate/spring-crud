@@ -1,3 +1,6 @@
+### 0.1.11-SNAPSHOT
+* Added a terrible `ApiResourceSecurityAdvisor` abstraction (that is very likely to change soon. so don't use it)
+
 ### 0.1.10-SNAPSHOT
 * Renamed `@ApiResourceController` to `@ApiController` to prevent name collision
 * Added support for `spring-json-view`
