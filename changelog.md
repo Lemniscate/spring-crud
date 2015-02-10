@@ -1,3 +1,9 @@
+### 0.1.10-SNAPSHOT
+* Renamed `@ApiResourceController` to `@ApiController` to prevent name collision
+* Added support for `spring-json-view`
+* Reworked `ApiResourceAssembler`'s `addLinks` so it delegates to a protected `addSelfLink` method if no default
+controller is found.  
+
 ### 0.1.9-SNAPSHOT
 * Added `ApiResourceControllerSupport` with `ApiResourceServices`, `ApiResourceAssemblers`, and `conversionService`
 

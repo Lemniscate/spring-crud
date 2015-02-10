@@ -52,13 +52,17 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
      * so implementations can customize links.
      */
     private void doAddLinks(Collection<Link> links, RB bean) {
+        addSelfLink(links, bean);
+        addLinks(links, bean);
+    }
+
+    protected void addSelfLink(Collection<Link> links, RB bean) {
         if( mapping.omitController() ){
             log.warn("Unable to provide 'self' link for nested entity " + mapping.domainClass().getSimpleName());
         }else{
             Link link = entityLinks.linkToSingleResource(bean).withSelfRel();
             links.add(link);
         }
-        addLinks(links, bean);
     }
 
     public void addLinks(Collection<Link> links, RB bean) {

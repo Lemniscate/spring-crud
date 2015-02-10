@@ -1,6 +1,8 @@
 package com.github.lemniscate.spring.crud.web.assembler;
 
 import com.github.lemniscate.spring.crud.util.ApiResourceRegistry;
+import com.github.lemniscate.spring.jsonviews.client.BaseView;
+import com.github.lemniscate.spring.jsonviews.client.JsonViewResponseEntity;
 import com.google.common.collect.Lists;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -77,7 +79,33 @@ public class ApiResourceAssemblers {
 
     public <E extends Identifiable<?>> ResponseEntity<List<E>> respond(Class<E> entity, Iterable<E> entities, HttpStatus status){
         return new ResponseEntity( assemble(entity, entities), status);
+}
+
+    //*** WITH VIEW methods ****
+    public <E extends Identifiable<?>> ResponseEntity<Resource<E>> respondWithView(E o, Class<? extends BaseView> view, HttpStatus status){
+        if( o == null ){
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+
+        Resource<E> resource = assemble(o);
+        Link self = resource.getLink("self");
+        MultiValueMap<String,String> headers = new LinkedMultiValueMap<String, String>();
+        if( status.equals(HttpStatus.CREATED) && self != null){
+            headers.add(X_SELF_HREF, self.getHref() );
+        }
+        return new JsonViewResponseEntity<Resource<E>>( view, resource, headers, status);
     }
+
+    public <E extends Identifiable<?>> JsonViewResponseEntity<Page<Resource<E>>> respondWithView(Class<E> entity,
+                     Class<? extends BaseView> jsonView, Page<E> page, Pageable pageable, HttpStatus status){
+        return new JsonViewResponseEntity( jsonView, assemble(entity, page, pageable), status);
+    }
+
+    public <E extends Identifiable<?>> JsonViewResponseEntity<List<E>> respondWithView(Class<E> entity,
+                               Class<? extends BaseView> jsonView, Iterable<E> entities, HttpStatus status){
+        return new JsonViewResponseEntity( jsonView, assemble(entity, entities), status);
+    }
+
 
 
 }
