@@ -2,11 +2,14 @@ package com.github.lemniscate.spring.crud.mapping;
 
 import com.github.lemniscate.spring.crud.annotation.AssembleWith;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -26,12 +29,8 @@ import java.util.Set;
 // TODO find a way to make this work with controller mappings
 @Slf4j
 public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMapping implements
-        ApplicationContextAware {
+        ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
-    private Collection<? extends ApiResourceHandlerMapping> endpoints;
-
-    @Getter
-    private MultiValueMap<Class<?>, PathPropertyMapping> assembleWith = new LinkedMultiValueMap();
 
     @Getter @RequiredArgsConstructor
     public static class PathPropertyMapping{
@@ -39,6 +38,16 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
         private final Class<?> controller;
         private final Method method;
     }
+    
+    private Collection<? extends ApiResourceHandlerMapping> endpoints = Lists.newArrayList();
+
+    @Getter
+    private MultiValueMap<Class<?>, PathPropertyMapping> assembleWith = new LinkedMultiValueMap();
+
+    private boolean initialized = false;
+    
+    @Setter @Getter
+    private boolean disabled = false;
 
     @Getter
     private Map<Class<?>, String> paths = new HashMap<Class<?>, String>();
@@ -46,17 +55,18 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
     @Getter
     private final String apiPrefix;
 
-    @Setter @Getter
-    private boolean disabled = false;
-
     public ApiResourceControllerHandlerMapping(String apiPrefix){
         this.apiPrefix = apiPrefix;
         setOrder(LOWEST_PRECEDENCE - 2);
     }
 
+    // TODO this is hacky, but for now we'll do it...
     @Override
-    public void afterPropertiesSet() {
-        super.afterPropertiesSet();
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if( initialized ){
+            return;
+        }
+
         this.endpoints = getApplicationContext().getBeansOfType(ApiResourceHandlerMapping.class).values();
 
         if (!this.disabled) {
@@ -64,6 +74,8 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
                 detectHandlerMethods(endpoint.getController());
             }
         }
+
+        initialized = true;
     }
 
     /**

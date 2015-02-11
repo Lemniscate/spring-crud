@@ -1,16 +1,13 @@
 package com.github.lemniscate.spring.crud.web;
 
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
-import com.github.lemniscate.spring.crud.security.ApiResourceSecurityAdvisor;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.util.ApiResourceSupport;
 import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.crud.view.JsonViewResolver;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.jsonviews.client.BaseView;
-import com.google.common.collect.Lists;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Identifiable;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,9 +41,6 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     @Getter
     protected final ApiResourceMapping<ID, E, CB, RB, UB> mapping;
 
-    @Autowired(required = false)
-    protected List<ApiResourceSecurityAdvisor<ID, E, CB, RB, UB>> advisors = Lists.newArrayList();
-
     @Inject
     public ApiResourceController(ApiResourceMapping<ID, E, CB, RB, UB> mapping) {
         this.mapping = mapping;
@@ -64,34 +57,29 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     @RequestMapping(value="", method= RequestMethod.GET)
     public ResponseEntity<Page<Resource<RB>>> getAll(@RequestParam MultiValueMap<String, String> params, Pageable p){
         Page<RB> entities = service.findForRead(p);
-        for(ApiResourceSecurityAdvisor a : advisors){ a.secureGetAll(entities); }
         return assemblers.respondWithView(mapping.readBeanClass(), view(ControllerMethod.GET_ALL), entities, p, HttpStatus.OK);
     }
 
     @RequestMapping(value="/{id}", method=RequestMethod.GET)
     public ResponseEntity<Resource<RB>> getOne(@PathVariable ID id){
         RB entity = service.read(conversionService.convert(id, mapping.idClass()));
-        for(ApiResourceSecurityAdvisor a : advisors){ a.secureGetOne(entity); }
         return assemblers.respondWithView(entity, view(ControllerMethod.GET_ONE), entity == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
     @RequestMapping(value="/{id}", method=RequestMethod.DELETE)
     public ResponseEntity<?> deleteOne(@PathVariable ID id){
-        for(ApiResourceSecurityAdvisor a : advisors){ a.secureDelete(id); }
         service.delete(conversionService.convert(id, mapping.idClass()));
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @RequestMapping(value="", method=RequestMethod.POST)
     public ResponseEntity<Resource<RB>> postOne(@RequestBody CB bean){
-        for(ApiResourceSecurityAdvisor a : advisors){ a.securePostOne(bean); }
         RB entity = service.createForRead(bean);
         return assemblers.respondWithView(entity, view(ControllerMethod.POST), HttpStatus.CREATED);
     }
 
     @RequestMapping(value="/{id}", method=RequestMethod.PUT)
     public ResponseEntity<Resource<RB>> putOne(@PathVariable ID id, @RequestBody UB bean){
-        for(ApiResourceSecurityAdvisor a : advisors){ a.securePutOne(id, bean); }
         RB entity = service.updateForRead( id, bean );
         return assemblers.respondWithView(entity, view(ControllerMethod.PUT), entity == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
@@ -99,7 +87,6 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     @RequestMapping(value="/searches", method=RequestMethod.POST)
     public ResponseEntity<Page<Resource<RB>>> search(@RequestBody Map<String, Object> search, Pageable pageable){
         Page<RB> entities = service.searchForRead(search, pageable);
-        for(ApiResourceSecurityAdvisor a : advisors){ a.secureSearch(search, entities); }
         return assemblers.respondWithView( mapping.readBeanClass(), view(ControllerMethod.SEARCH), entities, pageable, HttpStatus.OK);
     }
 

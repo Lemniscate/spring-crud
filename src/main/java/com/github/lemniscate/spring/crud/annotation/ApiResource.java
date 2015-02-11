@@ -1,8 +1,6 @@
 package com.github.lemniscate.spring.crud.annotation;
 
 
-import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
-
 import java.io.Serializable;
 import java.lang.annotation.*;
 

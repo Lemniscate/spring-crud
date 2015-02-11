@@ -1,7 +1,6 @@
 package com.github.lemniscate.spring.crud.util;
 
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

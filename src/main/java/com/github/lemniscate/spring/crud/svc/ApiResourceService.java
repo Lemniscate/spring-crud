@@ -6,7 +6,6 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.util.MultiValueMap;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

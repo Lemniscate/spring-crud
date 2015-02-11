@@ -28,7 +28,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 
-import javax.inject.Inject;
 import java.util.*;
 
 @Slf4j
@@ -197,8 +196,15 @@ public class ApiResourcesPostProcessor implements
 
 
                 if( isBeanType(def, JpaRepositoryFactoryBean.class)){
-                    String repoName = (String) def.getPropertyValues().get("repositoryInterface");
-                    Class<?> repoInterface = Class.forName(repoName);
+                    Class<?> repoInterface;
+                    Object o = def.getPropertyValues().get("repositoryInterface");
+                    if( o instanceof String){
+                        repoInterface = Class.forName((String) o);
+                    }else if(o instanceof Class){
+                        repoInterface = (Class<?>) o;
+                    }else{
+                        throw new IllegalStateException("Unknown repository interface type encountered: " + o);
+                    }
                     if( ApiResourceRepository.class.isAssignableFrom(repoInterface) ){
                         Class<?> entity = GenericTypeResolver.resolveTypeArguments(repoInterface , ApiResourceRepository.class)[1];
                         BeanDefinitionDetails details = map.get(entity);

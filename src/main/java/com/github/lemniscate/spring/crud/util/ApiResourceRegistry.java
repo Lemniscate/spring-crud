@@ -9,7 +9,6 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.util.Assert;
@@ -17,7 +16,6 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

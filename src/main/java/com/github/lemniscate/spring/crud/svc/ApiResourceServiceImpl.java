@@ -7,7 +7,6 @@ import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.search.OperationParser;
 import com.google.common.collect.Lists;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -19,10 +18,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.util.MultiValueMap;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
