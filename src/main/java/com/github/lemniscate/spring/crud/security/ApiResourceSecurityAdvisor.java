@@ -1,6 +1,6 @@
 package com.github.lemniscate.spring.crud.security;
 
-import org.springframework.data.domain.Page;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.hateoas.Identifiable;
 
 import java.io.Serializable;
@@ -13,17 +13,25 @@ public interface ApiResourceSecurityAdvisor<ID extends Serializable, E extends I
 
     Class<E> getDomainClass();
 
-    void secureGetAll(Class<?> domain, Page<RB> result);
+    void secureFind(Class<?> domain, Iterable<E> results);
 
-    void secureGetOne(Class<?> domain, RB result);
+    void secureFindOne(Class<?> domain, ID id, E result);
 
-    void secureDelete(Class<?> domain, ID idToDelete);
+    void secureFindByIds(Class<?> domain, Iterable<ID> ids, Iterable<E> results);
 
-    void securePostOne(Class<?> domain, CB toCreate);
+    void secureSave(Class<?> domain, E entity);
+    
+    void secureSaveMany(Class<?> domain, Iterable<E> entities);
 
-    void securePutOne(Class<?> domain, ID entityId, UB bean);
+    void secureDelete(Class<?> domain, E entity);
 
-    void secureSearch(Class<?> domain, Map<String, Object> search, Page<RB> results);
+    void secureDeleteMany(Class<?> domain, Iterable<E> entities);
 
-    void secureCatchAll(Class<?> domain, Object controller, Class<?> domainClass, Object result);
+    void secureDeleteAll(Class<?> domain);
+
+    void secureSearch(Class<?> domain, Map<String, Object> search, Iterable<E> results);
+
+    void secureCatchAll(Class<?> domain, Object controller, MethodSignature signature, Object result);
+
+    
 }

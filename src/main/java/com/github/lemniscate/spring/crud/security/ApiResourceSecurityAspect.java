@@ -1,23 +1,19 @@
 package com.github.lemniscate.spring.crud.security;
 
-import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
-import com.github.lemniscate.spring.crud.web.ApiResourceController;
+import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.data.domain.Page;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.hateoas.Identifiable;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,20 +26,13 @@ public class ApiResourceSecurityAspect {
 
     @Inject
     private ApiResourceSecurityAdvisors advisors;
-    
-    @Getter @Setter
-    private boolean ignoreCustomControllerMethods = true;
 
-    @Around("execution(public org.springframework.http.ResponseEntity com.github.lemniscate.spring.crud.web.ApiResourceController+.*(..))")
+    @Around("execution(* com.github.lemniscate.spring.crud.repo.ApiResourceRepository+.*(..))")
     public Object aroundAnyController(ProceedingJoinPoint pjp) throws Throwable {
         Object[] args = pjp.getArgs();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
-        if( !signature.getDeclaringType().equals(ApiResourceController.class) && ignoreCustomControllerMethods){
-            return pjp.proceed(args);
-        }
 
-        ApiResourceMapping mapping = ((ApiResourceController) pjp.getTarget()).getMapping();
-        Class<?> domain = mapping.domainClass();
+        Class<?> domain = GenericTypeResolver.resolveTypeArguments(pjp.getTarget().getClass(), ApiResourceRepository.class)[1];
 
         List<ApiResourceSecurityAdvisor> relevantAdvisors = advisors.map.get(domain);
 
@@ -51,29 +40,67 @@ public class ApiResourceSecurityAspect {
             return pjp.proceed(args);
         }else{
             ResultHolder holder = new ResultHolder(pjp);
+            Class[] pTypes = signature.getParameterTypes();
+            
             for(ApiResourceSecurityAdvisor a : relevantAdvisors){
                 switch( signature.getMethod().getName()){
-                    case "getAll":
-                        a.secureGetAll(domain, holder.proceed(Page.class));
+                    case "findAll":
+                        if( args.length > 0 && args[0] != null && Iterable.class.isAssignableFrom( args[0].getClass() )){
+                            a.secureFindByIds(domain, (Iterable) args[0], holder.proceed(Collection.class));
+                        }else {
+                            a.secureFind(domain, holder.proceed(Iterable.class));
+                        }
                         break;
+                    
+                    
+                    case "findOne":
+                        // intentional fall-through
                     case "getOne":
-                        a.secureGetOne(domain, holder.proceed(Identifiable.class));
+                        a.secureFindOne(domain, (Serializable) args[0], holder.proceed(Identifiable.class));
                         break;
-                    case "deleteOne":
-                        a.secureDelete(domain, holder.proceed(Serializable.class));
+                    
+                    case "saveAndFlush":
+                        // intentional fall-through
+                    case "save":
+                        if( args.length > 0 && args[0] != null && Iterable.class.isAssignableFrom( args[0].getClass() )) {
+                            a.secureSaveMany(domain, holder.proceed(Iterable.class));
+                        }else if( args.length > 0 && args[0] != null && Identifiable.class.isAssignableFrom( args[0].getClass())){
+                            a.secureSave(domain, holder.proceed(Identifiable.class));
+                        }else{
+                            log.warn("Unhandled save method... ");
+                            a.secureCatchAll(domain, pjp.getTarget(), signature, holder.proceed());
+                        }
+                        
                         break;
-                    case "postOne":
-                        a.securePostOne(domain, args[0]);
+                    
+                    
+                    case "delete":
+                        if( args.length > 0 && args[0] != null && Iterable.class.isAssignableFrom( args[0].getClass() )){
+                            a.secureDeleteMany(domain, (Iterable) args[0]);
+                        }else if( args.length > 0 && args[0] != null && Identifiable.class.isAssignableFrom( args[0].getClass())){
+                            a.secureDelete(domain, (Identifiable) args[0]);
+                        }else{
+                            log.warn("Unhandled delete method... ");
+                            a.secureCatchAll(domain, pjp.getTarget(), signature, holder.proceed());
+                        }
                         break;
-                    case "putOne":
-                        a.securePutOne(domain, (Serializable) args[0], args[1]);
+                    
+                    case "deleteInBatch":
+                        a.secureDeleteMany(domain, (Iterable) args[0]);
                         break;
+
+                    case "deleteAllInBatch":
+                        // intentional fall-through
+                    case "deleteAll":
+                        a.secureDeleteAll(domain);
+                        break;
+
                     case "search":
-                        a.secureSearch(domain, (Map<String, Object>) args[0], holder.proceed(Page.class));
+                        a.secureSearch(domain, (Map<String, Object>) args[0], holder.proceed(Iterable.class));
                         break;
 
                     default:
-                        a.secureCatchAll(domain, pjp.getTarget(), mapping.domainClass(), holder.proceed());
+                        a.secureCatchAll(domain, pjp.getTarget(), signature, holder.proceed());
 
                 }
             }
@@ -87,16 +114,13 @@ public class ApiResourceSecurityAspect {
         private final ProceedingJoinPoint pjp;
 
         @Getter
-        private ResponseEntity<?> result;
+        private Object result;
 
         public <T> T proceed(Class<T> type) throws Throwable {
             if( result == null ){
-                result = (ResponseEntity<?>) pjp.proceed(pjp.getArgs());
+                result = pjp.proceed(pjp.getArgs());
             }
-            Object o = result.getBody();
-            // if we have a Hateoas Resource, let's strip it out
-            o = o instanceof Resource ? ((Resource) o).getContent() : o;
-            return (T) o;
+            return (T) result;
         }
 
         public Object proceed() throws Throwable {
@@ -104,5 +128,5 @@ public class ApiResourceSecurityAspect {
         }
 
     }
-    
+
 }

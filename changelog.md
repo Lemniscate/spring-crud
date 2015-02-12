@@ -1,3 +1,6 @@
+### 0.1.13-SNAPSHOT
+* Reworked `ApiResourceSecurityAdvisor`s to target repositories, simplifying the process.
+
 ### 0.1.12-SNAPSHOT
 * Added `ApiResourceSecurityAdvisor` to advise synthesized controllers on security (via `ApiResourceSecurityAspect`)
 

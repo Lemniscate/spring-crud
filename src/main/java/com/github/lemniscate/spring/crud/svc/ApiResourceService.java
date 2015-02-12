@@ -42,11 +42,11 @@ public interface ApiResourceService<ID extends Serializable, E extends Identifia
 
     RB updateForRead(ID id, UB bean);
 
-    void delete(ID id);
+    E delete(ID id);
 
-    void delete(Iterable<ID> ids);
+    List<E> delete(Iterable<ID> ids);
 
-    void delete(E entity);
+    E delete(E entity);
 
     Page<E> search(Map<String, Object> search, Pageable pageable);
     Page<RB> searchForRead(Map<String, Object> search, Pageable pageable);

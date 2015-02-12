@@ -64,7 +64,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
 
     @Override
     public List<E> findByIds(Iterable<ID> ids) {
-        return repo.findByIdIn(ids);
+        return repo.findAll(ids);
     }
 
     @Override
@@ -80,12 +80,14 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
         return result;
     }
 
+    @Deprecated
     @Override
     public Page<E> query(MultiValueMap<String, String> params, Pageable p) {
         // TODO implement me
         throw new IllegalStateException("Not implemented yet");
     }
 
+    @Deprecated
     @Override
     public Page<RB> queryForRead(MultiValueMap<String, String> params, Pageable p) {
         Page<E> entities = query(params, p);
@@ -172,13 +174,14 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     }
 
     @Override
-    public void delete(ID id){
+    public E delete(ID id){
         E entity = findOne(id);
         delete(entity);
+        return entity;
     }
 
     @Override
-    public void delete(Iterable<ID> ids) {
+    public List<E> delete(Iterable<ID> ids) {
         List<E> entities = findByIds(ids);
         for(E entity : entities){
             E pre = entity;
@@ -193,10 +196,11 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
                 listener.afterDelete(post);
             }
         }
+        return entities;
     }
 
     @Override
-    public void delete(E entity){
+    public E delete(E entity){
         if( entity != null ) {
             E pre = entity;
             for (ApiResourceLifecycleListener<E> listener : listeners) {
@@ -208,7 +212,10 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
             for (ApiResourceLifecycleListener<E> listener : listeners) {
                 listener.afterDelete(entity);
             }
+            
+            return entity;
         }
+        return null;
     }
 
     // TODO use an adapter approach to support multiple SpringData projects?

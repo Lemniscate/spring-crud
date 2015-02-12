@@ -6,7 +6,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.hateoas.Identifiable;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @Author dave 8/8/14 9:34 PM
@@ -14,7 +13,5 @@ import java.util.List;
 @NoRepositoryBean
 public interface ApiResourceRepository<ID extends Serializable, E extends Identifiable<ID>>
         extends JpaRepository<E, ID>, JpaSpecificationExecutor<E> {
-
-    List<E> findByIdIn(Iterable<ID> ids);
-
+    
 }

@@ -1,7 +1,7 @@
 package com.github.lemniscate.spring.crud.security;
 
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.data.domain.Page;
 import org.springframework.hateoas.Identifiable;
 
 import java.io.Serializable;
@@ -19,25 +19,34 @@ public abstract class BaseSecurityAdvisor<ID extends Serializable, E extends Ide
     }
 
     @Override
-    public void secureGetAll(Class<?> domain, Page<RB> result) {}
+    public void secureFind(Class<?> domain, Iterable<E> results) { }
 
     @Override
-    public void secureGetOne(Class<?> domain, RB result) {}
+    public void secureFindOne(Class<?> domain, ID id, E result) { }
 
     @Override
-    public void secureDelete(Class<?> domain, ID idToDelete) {}
+    public void secureFindByIds(Class<?> domain, Iterable<ID> ids, Iterable<E> results) { }
 
     @Override
-    public void securePostOne(Class<?> domain, CB toCreate) {}
+    public void secureSave(Class<?> domain, E entity) { }
 
     @Override
-    public void securePutOne(Class<?> domain, ID entityId, UB bean) {}
+    public void secureSaveMany(Class<?> domain, Iterable<E> entities) { }
 
     @Override
-    public void secureSearch(Class<?> domain, Map<String, Object> search, Page<RB> results) {}
+    public void secureDelete(Class<?> domain, E entity) { }
 
     @Override
-    public void secureCatchAll(Class<?> domain, Object controller, Class<?> domainClass, Object result) {}
+    public void secureDeleteMany(Class<?> domain, Iterable<E> entities) { }
+
+    @Override
+    public void secureDeleteAll(Class<?> domain) { }
+
+    @Override
+    public void secureSearch(Class<?> domain, Map<String, Object> search, Iterable<E> results) { }
+
+    @Override
+    public void secureCatchAll(Class<?> domain, Object controller, MethodSignature signature, Object result) { }
 
     protected void fail(String message){
         throw new SecurityAdvisorRejectedException(message);
