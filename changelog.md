@@ -1,3 +1,6 @@
+### 0.1.12-SNAPSHOT
+* Added `ApiResourceSecurityAdvisor` to advise synthesized controllers on security (via `ApiResourceSecurityAspect`)
+
 ### 0.1.11-SNAPSHOT
 * Removed stupid security attempt
 * Fixed dependencies

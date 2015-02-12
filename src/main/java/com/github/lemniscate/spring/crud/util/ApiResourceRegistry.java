@@ -6,6 +6,7 @@ import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.google.common.collect.Maps;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +33,7 @@ public class ApiResourceRegistry{
     private Map<Class<?>, ApiResourceService<?,?,?,?,?>> services = Maps.newHashMap();
     private Map<Class<?>, ApiResourceRepository<?,?>> repos = Maps.newHashMap();
 
+    @Getter
     private final List<ApiResourceMapping> mappings;
 
     public ApiResourceRegistry(List<ApiResourceMapping> mappings) {

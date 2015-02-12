@@ -2,6 +2,8 @@ package com.github.lemniscate.spring.crud.annotation;
 
 import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMapping;
 import com.github.lemniscate.spring.crud.processor.ApiResourcesPostProcessor;
+import com.github.lemniscate.spring.crud.security.ApiResourceSecurityAdvisors;
+import com.github.lemniscate.spring.crud.security.ApiResourceSecurityAspect;
 import com.github.lemniscate.spring.crud.view.JsonViewResolver;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceEntityLinks;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceLinkBuilderFactory;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -91,6 +94,19 @@ public @interface EnableApiResources {
         @ConditionalOnMissingBean(ApiResourceEntityLinks.class)
         public static ApiResourceEntityLinks apiResourceEntityLinks(){
             return new ApiResourceEntityLinks();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(ApiResourceSecurityAdvisors.class)
+        public static ApiResourceSecurityAdvisors apiResourceSecurityAdvisors(){
+            return new ApiResourceSecurityAdvisors();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean(ApiResourceSecurityAspect.class)
+        @ConditionalOnProperty(prefix = "lemniscate.crud", name = "enable-security", matchIfMissing = true)
+        public static ApiResourceSecurityAspect apiResourceSecurityAspect(){
+            return new ApiResourceSecurityAspect();
         }
 
     }
