@@ -1,3 +1,6 @@
+### 0.1.15-SNAPSHOT
+* Updated `spring-json-views` for `Page` serialization with view support
+
 ### 0.1.14-SNAPSHOT
 * Added check to `ApiResourceSecurityAspect` in case repositories overload one of our repositories method names
 

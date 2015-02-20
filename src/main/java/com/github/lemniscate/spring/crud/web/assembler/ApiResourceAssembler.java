@@ -2,6 +2,7 @@ package com.github.lemniscate.spring.crud.web.assembler;
 
 import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMapping;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
+import com.github.lemniscate.spring.jsonviews.struct.BaseViewResource;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +45,9 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
 
     @Override
     public Resource<RB> toResource(RB bean) {
-        Collection<Link> links = new ArrayList<Link>();
+        List<Link> links = new ArrayList<Link>();
         doAddLinks(links, bean);
-        return new Resource<RB>(bean, links);
+        return new BaseViewResource<RB>(bean, links);
     }
 
     /**
