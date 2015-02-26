@@ -65,13 +65,13 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     }
 
     @RequestMapping(value="/{id}", method=RequestMethod.GET)
-    public ResponseEntity<Resource<RB>> getOne(@PathVariable ID id){
+    public ResponseEntity<Resource<RB>> getOne(@PathVariable("id") ID id){
         RB entity = service.read(conversionService.convert(id, mapping.idClass()));
         return assemblers.respondWithView(entity, view(ControllerMethod.GET_ONE), entity == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
     @RequestMapping(value="/{id}", method=RequestMethod.DELETE)
-    public ResponseEntity<?> deleteOne(@PathVariable ID id){
+    public ResponseEntity<?> deleteOne(@PathVariable("id") ID id){
         service.delete(conversionService.convert(id, mapping.idClass()));
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
@@ -83,7 +83,7 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     }
 
     @RequestMapping(value="/{id}", method=RequestMethod.PUT)
-    public ResponseEntity<Resource<RB>> putOne(@PathVariable ID id, @RequestBody UB bean){
+    public ResponseEntity<Resource<RB>> putOne(@PathVariable("id") ID id, @RequestBody UB bean){
         RB entity = service.updateForRead( id, bean );
         return assemblers.respondWithView(entity, view(ControllerMethod.PUT), entity == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
