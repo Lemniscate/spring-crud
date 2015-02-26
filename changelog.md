@@ -1,5 +1,5 @@
 ### 0.1.16-SNAPSHOT
-* Moved Assemblers behind an interface. 
+* Moved Assemblers behind an interface. `IApiResourceAssembler` will likely change soon
 * Added spring-type-hints to help with resolutions. 
 * Handled fringe cases with Proxies
 
