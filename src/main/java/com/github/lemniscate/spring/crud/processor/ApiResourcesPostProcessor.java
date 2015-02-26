@@ -159,7 +159,7 @@ public class ApiResourcesPostProcessor implements
             Class<?> abstractClass = ApiResourceAssembler.class;
             Collection<Class<?>> ifaces = new ArrayList<>();
             ifaces.add(IApiResourceAssembler.class);
-            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, ifaces, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                     .addPropertyValue("mapping", mapping)
