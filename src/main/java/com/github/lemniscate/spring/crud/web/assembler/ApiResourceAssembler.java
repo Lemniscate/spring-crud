@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @Transactional
 public class ApiResourceAssembler<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
-        extends ResourceAssemblerSupport<RB, Resource<RB>> {
+        extends ResourceAssemblerSupport<RB, Resource<RB>> implements IApiResourceAssembler<ID,E,CB,RB,UB> {
 
     @Inject
     protected EntityLinks entityLinks;
@@ -68,6 +68,7 @@ public class ApiResourceAssembler<ID extends Serializable, E extends Identifiabl
         }
     }
 
+    @Override
     public void addLinks(Collection<Link> links, RB bean) {
 //        AssemblerFieldHelper helper = new AssemblerFieldHelper(beanLinks, arLinkBuilder, beanLookup, links, bean);
 //        ReflectionUtils.doWithFields(bean.getClass(), helper, helper);

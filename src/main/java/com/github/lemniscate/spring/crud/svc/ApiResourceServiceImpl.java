@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.Identifiable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
 import javax.inject.Inject;
@@ -22,6 +23,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+@Transactional
 public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB>
         implements ApiResourceService<ID,E,CB,RB,UB> {
 
@@ -212,7 +214,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
             for (ApiResourceLifecycleListener<E> listener : listeners) {
                 listener.afterDelete(entity);
             }
-            
+
             return entity;
         }
         return null;

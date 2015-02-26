@@ -4,9 +4,11 @@ import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.util.ApiResourceSupport;
 import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
+import com.github.lemniscate.spring.crud.util.ApiResourceTypeHintResolver;
 import com.github.lemniscate.spring.crud.view.JsonViewResolver;
-import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
+import com.github.lemniscate.spring.crud.web.assembler.IApiResourceAssembler;
 import com.github.lemniscate.spring.jsonviews.client.BaseView;
+import com.github.lemniscate.spring.typehint.annotation.TypeHints;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,10 +35,12 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     protected JsonViewResolver jsonViewResolver;
 
     @Inject
+    @TypeHints(resolver = ApiResourceTypeHintResolver.class)
     protected ApiResourceService<ID, E, CB, RB, UB> service;
 
     @Inject
-    protected ApiResourceAssembler<ID, E, CB, RB, UB> assembler;
+    @TypeHints(resolver = ApiResourceTypeHintResolver.class)
+    protected IApiResourceAssembler<ID, E, CB, RB, UB> assembler;
 
     @Getter
     protected final ApiResourceMapping<ID, E, CB, RB, UB> mapping;
@@ -93,5 +97,6 @@ public class ApiResourceController<ID extends Serializable, E extends Identifiab
     private Class<? extends BaseView> view(ControllerMethod method){
         return jsonViewResolver.resolve(method, mapping.readBeanClass());
     }
+
 
 }

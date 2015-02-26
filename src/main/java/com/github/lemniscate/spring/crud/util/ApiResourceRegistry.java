@@ -5,9 +5,12 @@ import com.github.lemniscate.spring.crud.repo.ApiResourceRepository;
 import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
+import com.github.lemniscate.spring.crud.web.assembler.IApiResourceAssembler;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.GenericTypeResolver;
@@ -28,7 +31,7 @@ import java.util.Map;
 @Slf4j
 public class ApiResourceRegistry{
 
-    private Map<Class<?>, ApiResourceAssembler<?,?,?,?,?>> assemblers = Maps.newHashMap();
+    private Map<Class<?>, IApiResourceAssembler<?,?,?,?,?>> assemblers = Maps.newHashMap();
     private Map<Class<?>, ApiResourceController<?,?,?,?,?>> controllers = Maps.newHashMap();
     private Map<Class<?>, ApiResourceService<?,?,?,?,?>> services = Maps.newHashMap();
     private Map<Class<?>, ApiResourceRepository<?,?>> repos = Maps.newHashMap();
@@ -46,11 +49,18 @@ public class ApiResourceRegistry{
     public ApiResourceRegistry register(Object o){
         Assert.notNull(o, "Cannot register null object");
         Class<?> c = o.getClass();
-        if( ApiResourceMapping.class.isAssignableFrom(c) ){
+
+
+        // if we get proxies and it's not a repository, look at the underlying class
+        if (AopUtils.isJdkDynamicProxy(o) && !ApiResourceRepository.class.isAssignableFrom(c)) {
+            c = ((Advised) o).getTargetClass();
+        }
+
+        if (ApiResourceMapping.class.isAssignableFrom(c) ){
             mappings.add((ApiResourceMapping<?, ?, ?, ?, ?>) o);
-        }else if( ApiResourceAssembler.class.isAssignableFrom(c) ){
-            Class<?> entity = GenericTypeResolver.resolveTypeArguments(c, ApiResourceAssembler.class)[1];
-            assemblers.put(entity, (ApiResourceAssembler<?, ?, ?, ?, ?>) o);
+        }else if( IApiResourceAssembler.class.isAssignableFrom(c) ){
+            Class<?> entity = GenericTypeResolver.resolveTypeArguments(c, IApiResourceAssembler.class)[1];
+            assemblers.put(entity, (IApiResourceAssembler<?, ?, ?, ?, ?>) o);
         }else if( ApiResourceService.class.isAssignableFrom(c) ){
             Class<?> entity = GenericTypeResolver.resolveTypeArguments(c, ApiResourceService.class)[1];
             services.put(entity, (ApiResourceService<?, ?, ?, ?, ?>) o);
@@ -66,16 +76,10 @@ public class ApiResourceRegistry{
 
         return this;
     }
-//
-//    public ApiResourceRegistry register(ApiResourceAssembler<?,?,?,?,?> e){
-//        Class<?> entity = GenericTypeResolver.resolveTypeArguments(e.getClass(), ApiResourceAssembler.class)[1];
-//        assemblers.put(entity, e);
-//        return this;
-//    }
 
-    public <ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB, RT extends ApiResourceAssembler>
+    public <ID extends Serializable, E extends Identifiable<ID>, CB, RB extends Identifiable<ID>, UB, RT extends IApiResourceAssembler>
             RT getAssembler(Class<?> entity){
-        ApiResourceAssembler<?, ?, ?, ?, ?> result = assemblers.get(entity);
+        IApiResourceAssembler<?, ?, ?, ?, ?> result = assemblers.get(entity);
         Assert.notNull("Could not locate assembler for " + entity.getName());
         return (RT) result;
     }
@@ -130,7 +134,7 @@ public class ApiResourceRegistry{
     @PostConstruct
     public void init() throws BeansException {
         Class<?>[] classes = new Class[]{
-            ApiResourceAssembler.class, ApiResourceController.class,
+            IApiResourceAssembler.class, ApiResourceController.class,
             ApiResourceService.class, ApiResourceRepository.class
         };
         for(Class c : classes){

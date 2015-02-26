@@ -11,7 +11,9 @@ import com.github.lemniscate.spring.crud.util.ApiResourceUtil;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
+import com.github.lemniscate.spring.crud.web.assembler.IApiResourceAssembler;
 import com.github.lemniscate.util.bytecode.JavassistUtil;
+import com.google.common.collect.Lists;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -155,7 +157,9 @@ public class ApiResourcesPostProcessor implements
             String component = "Assembler";
             String name = entity.getSimpleName() + component;
             Class<?> abstractClass = ApiResourceAssembler.class;
-            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            Collection<Class<?>> ifaces = new ArrayList<>();
+            ifaces.add(IApiResourceAssembler.class);
+            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, ifaces, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                     .addPropertyValue("mapping", mapping)

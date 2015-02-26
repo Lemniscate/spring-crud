@@ -6,8 +6,8 @@ import com.github.lemniscate.spring.crud.svc.ApiResourceService;
 import com.github.lemniscate.spring.crud.svc.ApiResourceServices;
 import com.github.lemniscate.spring.crud.util.ApiResourceRegistry;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
-import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
+import com.github.lemniscate.spring.crud.web.assembler.IApiResourceAssembler;
 import config.DefaultConfig;
 import demo.model.Organization;
 import demo.model.Pet;
@@ -25,13 +25,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -62,7 +59,7 @@ public class DummyTest {
     private ApiResourceController<Long, User, User, User, User> userController;
 
     @Inject
-    private ApiResourceAssembler<Long, User, User, User, User> userAssembler;
+    private IApiResourceAssembler<Long, User, User, User, User> userAssembler;
 
     @Inject
     private ApiResourceAssemblers assemblers;

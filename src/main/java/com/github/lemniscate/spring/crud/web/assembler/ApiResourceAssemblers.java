@@ -33,7 +33,7 @@ public class ApiResourceAssemblers {
     private ApiResourceRegistry registry;
 
     public <E extends Identifiable<?>> List<Resource<E>> assemble(Class<?> entity, Iterable<E> list){
-        ApiResourceAssembler a = registry.getAssembler(entity);
+        IApiResourceAssembler a = registry.getAssembler(entity);
         Assert.notNull(a, "Could not find the appropriate assembler for " + entity.getSimpleName());
 
         List<Resource<E>> result = Lists.newArrayList();
@@ -54,7 +54,7 @@ public class ApiResourceAssemblers {
             return null;
         }
 
-        ApiResourceAssembler a = registry.getAssembler(entity.getClass());
+        IApiResourceAssembler a = registry.getAssembler(entity.getClass());
         Assert.notNull(a, "Could not find the appropriate assembler for " + entity.getClass().getSimpleName());
         return a.toResource(entity);
     }
@@ -77,7 +77,7 @@ public class ApiResourceAssemblers {
         return new ResponseEntity( assemble(entity, page, pageable), status);
     }
 
-    public <E extends Identifiable<?>> ResponseEntity<List<E>> respond(Class<E> entity, Iterable<E> entities, HttpStatus status){
+    public <E extends Identifiable<?>> ResponseEntity<List<Resource<E>>> respond(Class<E> entity, Iterable<E> entities, HttpStatus status){
         return new ResponseEntity( assemble(entity, entities), status);
 }
 
