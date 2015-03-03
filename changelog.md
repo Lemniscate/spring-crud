@@ -1,3 +1,6 @@
+### 0.1.19-SNAPSHOT
+* Updated spring-type-hints
+
 ### 0.1.18-SNAPSHOT
 * Better Logging
 

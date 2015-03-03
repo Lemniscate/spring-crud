@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.github.lemniscate</groupId>
             <artifactId>spring-type-hints</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
