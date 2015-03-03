@@ -1,3 +1,9 @@
+### 0.1.18-SNAPSHOT
+* Better Logging
+
+### 0.1.17-SNAPSHOT
+(fill me in)
+
 ### 0.1.16-SNAPSHOT
 * Moved Assemblers behind an interface. `IApiResourceAssembler` will likely change soon
 * Added spring-type-hints to help with resolutions. 

@@ -28,7 +28,7 @@ public class ApiResourceTypeHintResolver implements TypeHints.TypeHintResolver {
             }
         }
 
-        Assert.notNull(superType);
+        Assert.notNull(superType, "Could not determine superType to compare " + source.getName());
         return GenericTypeResolver.resolveTypeArguments(source, superType);
     }
 }
