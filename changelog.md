@@ -1,3 +1,9 @@
+### 0.1.21-SNAPSHOT
+* Bumped spring-type-hints to 0.1.2
+
+### 0.1.20-SNAPSHOT
+Skipped due to errors...
+
 ### 0.1.19-SNAPSHOT
 * Updated spring-type-hints
 
