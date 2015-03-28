@@ -32,7 +32,7 @@ public class ApiResourceLinkBuilderFactory extends ControllerLinkBuilderFactory 
 
         String uri = mapping == null ? "" : mapping;
         uri += handlerMapping.getApiPrefix()
-                + handlerMapping.getPaths().get(entity)
+                + handlerMapping.getPath(entity)
                 + "/"
                 + DISCOVERER.getMapping(controller, method);
 
@@ -47,7 +47,7 @@ public class ApiResourceLinkBuilderFactory extends ControllerLinkBuilderFactory 
         String mapping = DISCOVERER.getMapping(controller);
 
         String uri = mapping == null ? "" : mapping;
-        uri += handlerMapping.getApiPrefix() + handlerMapping.getPaths().get(entity);
+        uri += handlerMapping.getApiPrefix() + handlerMapping.getPath(entity);
 
         UriTemplate template = new UriTemplate(uri);
 

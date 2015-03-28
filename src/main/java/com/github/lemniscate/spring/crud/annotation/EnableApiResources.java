@@ -12,6 +12,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -65,7 +66,13 @@ public @interface EnableApiResources {
     }
 
     @Configuration
-    public static class ApiResourceConfiguration{
+    public static class ApiResourceConfiguration extends WebMvcAutoConfiguration.EnableWebMvcConfiguration {
+
+
+        @Override
+        public ApiResourceControllerHandlerMapping requestMappingHandlerMapping() {
+            return new ApiResourceControllerHandlerMapping();
+        }
 
         @Inject
         private String apiResourcePrefix;
@@ -74,14 +81,6 @@ public @interface EnableApiResources {
         @ConditionalOnMissingBean(JsonViewResolver.class)
         public JsonViewResolver jsonViewResolver(){
             return new JsonViewResolver();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(ApiResourceControllerHandlerMapping.class)
-        public ApiResourceControllerHandlerMapping apiResourcesHandlerMapping(){
-            ApiResourceControllerHandlerMapping result = new ApiResourceControllerHandlerMapping(apiResourcePrefix);
-            result.setOrder(-1);
-            return result;
         }
 
         @Bean

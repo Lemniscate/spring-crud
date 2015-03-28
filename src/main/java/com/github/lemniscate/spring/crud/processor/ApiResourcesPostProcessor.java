@@ -14,6 +14,7 @@ import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
 import com.github.lemniscate.spring.crud.web.assembler.IApiResourceAssembler;
 import com.github.lemniscate.util.bytecode.JavassistUtil;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +103,7 @@ public class ApiResourcesPostProcessor implements
             String component = "Service";
             String name = entity.getSimpleName() + component;
             Class<?> abstractClass = ApiResourceServiceImpl.class;
-            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            Class<?> serviceClass = generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                     .addConstructorArgValue(mapping)
@@ -118,7 +119,7 @@ public class ApiResourcesPostProcessor implements
             String component = "Repository";
             String name = entity.getSimpleName() + component;
             Class<?> abstractClass = ApiResourceRepository.class;
-            Class<?> serviceClass = JavassistUtil.generateTypedInterface(name, abstractClass, mapping.idClass(), mapping.domainClass());
+            Class<?> serviceClass = generateTypedInterface(name, abstractClass, mapping.idClass(), mapping.domainClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(JpaRepositoryFactoryBean.class)
                     .addPropertyValue("repositoryInterface", serviceClass)
@@ -137,7 +138,7 @@ public class ApiResourcesPostProcessor implements
                 String component = "Controller";
                 String name = entity.getSimpleName() + component;
                 Class<?> abstractClass = ApiResourceController.class;
-                Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+                Class<?> serviceClass = generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
                 AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                         .addConstructorArgValue(mapping)
@@ -149,7 +150,8 @@ public class ApiResourcesPostProcessor implements
         }else{
             log.info("Found controller for {}", entity.getSimpleName());
             String name = entity.getSimpleName() + "Controller";
-            registry.registerBeanDefinition(name, details.controller);
+            String alias = findBeanDefinitionName(registry, details.controller);
+            registry.registerAlias(alias, name);
         }
 
         if( details.assembler == null){
@@ -159,7 +161,7 @@ public class ApiResourcesPostProcessor implements
             Class<?> abstractClass = ApiResourceAssembler.class;
             Collection<Class<?>> ifaces = new ArrayList<>();
             ifaces.add(IApiResourceAssembler.class);
-            Class<?> serviceClass = JavassistUtil.generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
+            Class<?> serviceClass = generateTypedSubclass(name, abstractClass, mapping.idClass(), mapping.domainClass(), mapping.createBeanClass(), mapping.readBeanClass(), mapping.updateBeanClass());
 
             AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(serviceClass)
                     .addPropertyValue("mapping", mapping)
@@ -172,6 +174,15 @@ public class ApiResourcesPostProcessor implements
         }
     }
 
+    private String findBeanDefinitionName(BeanDefinitionRegistry registry, AbstractBeanDefinition def) {
+        for(String name : registry.getBeanDefinitionNames()){
+            BeanDefinition bd = registry.getBeanDefinition(name);
+            if( bd.equals(def) ){
+                return name;
+            }
+        }
+        throw new IllegalStateException("Could not find bean definition " + def);
+    }
 
 
     // TODO this needs a lot of love!
@@ -269,4 +280,19 @@ public class ApiResourcesPostProcessor implements
         AbstractBeanDefinition repository, service, controller, assembler;
     }
 
+
+    // keep a cache of our generated classes (to prevent frozen class errors)
+    private static Map<String, Class<?>> cache = Maps.newHashMap();
+    public static Class<?> generateTypedSubclass(String name, Class<?> baseImpl, Class<?>... classes){
+        if( !cache.containsKey(name) ){
+            cache.put(name, JavassistUtil.generateTypedSubclass(name, baseImpl, classes));
+        }
+        return cache.get(name);
+    }
+    public static Class<?> generateTypedInterface(String name, Class<?> baseImpl, Class<?>... classes) throws NotFoundException, CannotCompileException {
+        if( !cache.containsKey(name) ){
+            cache.put(name, JavassistUtil.generateTypedInterface(name, baseImpl, classes));
+        }
+        return cache.get(name);
+    }
 }
