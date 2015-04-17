@@ -20,6 +20,7 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.inject.Inject;
 import java.lang.annotation.*;
@@ -71,7 +72,11 @@ public @interface EnableApiResources {
 
         @Override
         public ApiResourceControllerHandlerMapping requestMappingHandlerMapping() {
-            return new ApiResourceControllerHandlerMapping();
+            ApiResourceControllerHandlerMapping result = new ApiResourceControllerHandlerMapping();
+            // interceptors were not getting set for some reason
+            // TODO research why we need this workaround
+            result.setInterceptors(getInterceptors());
+            return result;
         }
 
         @Inject
