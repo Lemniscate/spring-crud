@@ -1,3 +1,15 @@
+### 0.1.22-SNAPSHOT
+* Manually add interceptors to `ApiResourceControllerHandlerMapping`
+
+### 0.1.22-SNAPSHOT
+* Reworked `ApiResourceControllerHandlerMapping` to not be such a hack. Should play nice with JRebel / SpringLoaded
+
+### 0.1.21-SNAPSHOT
+* Bumped spring-type-hints to 0.1.2
+
+### 0.1.20-SNAPSHOT
+Skipped due to errors...
+
 ### 0.1.19-SNAPSHOT
 * Updated spring-type-hints
 

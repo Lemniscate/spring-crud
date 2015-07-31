@@ -295,4 +295,8 @@ public class ApiResourcesPostProcessor implements
         }
         return cache.get(name);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 71b04cb1464dbbec72e0f3ad870202a6d4e03ade

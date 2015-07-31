@@ -1,99 +1,68 @@
 package com.github.lemniscate.spring.crud.mapping;
 
 import com.github.lemniscate.spring.crud.annotation.AssembleWith;
+import com.github.lemniscate.spring.crud.util.ApiResourceRegistry;
 import com.github.lemniscate.spring.crud.web.ApiResourceController;
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.condition.*;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.inject.Inject;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-// TODO find a way to make this work with controller mappings
-@Slf4j
-public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMapping implements
-        ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
+/**
+ * Created by dave on 3/27/15.
+ */
+public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMapping {
 
 
-    @Getter @RequiredArgsConstructor
-    public static class PathPropertyMapping{
-        private final String property;
-        private final Class<?> controller;
-        private final Method method;
-    }
-    
-    private Collection<? extends ApiResourceHandlerMapping> endpoints = Lists.newArrayList();
+    @Setter
+    @Value("${lemniscate.crud.apiPrefix:}")
+    private String apiPrefix;
+
+    @Inject
+    private ApiResourceRegistry registry;
 
     @Getter
     private MultiValueMap<Class<?>, PathPropertyMapping> assembleWith = new LinkedMultiValueMap();
 
-    private boolean initialized = false;
-    
-    @Setter @Getter
-    private boolean disabled = false;
 
-    @Getter
-    private Map<Class<?>, String> paths = new HashMap<Class<?>, String>();
+    // TODO wire these up on getters
+    private boolean useSuffixPatternMatch = true;
+    private boolean useRegisteredSuffixPatternMatch = false;
+    private boolean useTrailingSlashMatch = true;
+    private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
+    private final List<String> fileExtensions = new ArrayList<String>();
 
-    @Getter
-    private final String apiPrefix;
-
-    public ApiResourceControllerHandlerMapping(String apiPrefix){
-        this.apiPrefix = apiPrefix;
-        setOrder(LOWEST_PRECEDENCE - 2);
-    }
-
-    // TODO this is hacky, but for now we'll do it...
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if( initialized ){
-            return;
-        }
-
-        this.endpoints = getApplicationContext().getBeansOfType(ApiResourceHandlerMapping.class).values();
-
-        if (!this.disabled) {
-            for (ApiResourceHandlerMapping endpoint : this.endpoints) {
-                detectHandlerMethods(endpoint.getController());
-            }
-        }
-
-        initialized = true;
-    }
-
-    /**
-     * Since all handler beans are passed into the constructor there is no need to detect
-     * anything here
-     */
     @Override
     protected boolean isHandler(Class<?> beanType) {
-        return false;
+        return super.isHandler(beanType)
+            || ApiResourceController.class.isAssignableFrom(beanType);
     }
 
     @Override
-    protected void registerHandlerMethod(Object handler, Method method,
-                                         RequestMappingInfo mapping) {
+    protected void detectHandlerMethods(Object handler) {
+        super.detectHandlerMethods(handler);
+    }
 
-        if (mapping == null) {
-            return;
-        }
+    @Override
+    protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
+        super.registerHandlerMethod(handler, method, mapping);
 
         Set<String> defaultPatterns = mapping.getPatternsCondition().getPatterns();
         String[] patterns = new String[defaultPatterns.isEmpty() ? 1 : defaultPatterns.size()];
@@ -106,7 +75,6 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
         if (bean instanceof ApiResourceController) {
             ApiResourceController endpoint = (ApiResourceController) bean;
             path = endpoint.getMapping().path();
-            paths.put(  endpoint.getMapping().domainClass(), path );
         }
 
         int i = 0;
@@ -137,14 +105,81 @@ public class ApiResourceControllerHandlerMapping extends RequestMappingHandlerMa
             }
         }
 
-        PatternsRequestCondition patternsInfo = new PatternsRequestCondition(patterns);
 
-        RequestMappingInfo modified = new RequestMappingInfo(patternsInfo,
-                mapping.getMethodsCondition(), mapping.getParamsCondition(),
-                mapping.getHeadersCondition(), mapping.getConsumesCondition(),
-                mapping.getProducesCondition(), mapping.getCustomCondition());
-
-        super.registerHandlerMethod(handler, method, modified);
     }
 
+    @Override
+    protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+        RequestMappingInfo result;
+        if(ApiResourceController.class.isAssignableFrom(handlerType)){
+            result = custom(method, handlerType);
+        }else{
+            result = super.getMappingForMethod(method, handlerType);
+        }
+        return result;
+    }
+
+
+    private RequestMappingInfo custom(Method method, Class<?> handlerType) {
+        RequestMappingInfo info = null;
+        RequestMapping methodAnnotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+        if (methodAnnotation != null) {
+            RequestCondition<?> methodCondition = getCustomMethodCondition(method);
+            info = customCreateRequestMappingInfo(methodAnnotation, methodCondition, handlerType);
+            RequestMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
+            if (typeAnnotation != null) {
+                RequestCondition<?> typeCondition = getCustomTypeCondition(handlerType);
+                info = createRequestMappingInfo(typeAnnotation, typeCondition).combine(info);
+            }
+        }
+        return info;
+    }
+
+
+    protected RequestMappingInfo customCreateRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition, Class<?> handlerType) {
+        String[] patterns = customResolveEmbeddedValuesInPatterns(annotation.value(), handlerType);
+        return new RequestMappingInfo(
+                new PatternsRequestCondition(patterns, getUrlPathHelper(), getPathMatcher(),
+                        this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions),
+                new RequestMethodsRequestCondition(annotation.method()),
+                new ParamsRequestCondition(annotation.params()),
+                new HeadersRequestCondition(annotation.headers()),
+                new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
+                new ProducesRequestCondition(annotation.produces(), annotation.headers(), this.contentNegotiationManager),
+                customCondition);
+    }
+
+
+    protected String[] customResolveEmbeddedValuesInPatterns(String[] patterns, Class<?> handlerType) {
+        Class<?>[] types = GenericTypeResolver.resolveTypeArguments(handlerType, ApiResourceController.class);
+        Assert.notEmpty(types, "Could not determine types");
+        ApiResourceMapping mapping = registry.getMapping(types[1]);
+
+        String path = mapping.path();
+        path = getApiPrefix() + (StringUtils.hasText(path) ? "/" + path : "");
+        String[] mappings = super.resolveEmbeddedValuesInPatterns(patterns);
+        String[] result = new String[mappings.length];
+        for(int i = 0; i < mappings.length; i++){
+            result[i] = path + mappings[i];
+        }
+        return result;
+    }
+
+
+    public String getApiPrefix() {
+        return StringUtils.hasLength(apiPrefix) ? apiPrefix : "";
+    }
+
+    public String getPath(Class<?> domainClass){
+        ApiResourceMapping mapping = registry.getMapping(domainClass);
+        return mapping == null ? null : mapping.path();
+    }
+
+
+    @Getter @RequiredArgsConstructor
+    public static class PathPropertyMapping{
+        private final String property;
+        private final Class<?> controller;
+        private final Method method;
+    }
 }

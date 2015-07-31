@@ -114,6 +114,15 @@ public class ApiResourceRegistry{
         throw new IllegalStateException("Could not determine mapping type " + type + " from " + clazz.getSimpleName());
     }
 
+    public ApiResourceMapping getMapping(Class<?> domainClass){
+        for(ApiResourceMapping mapping : mappings){
+            if( domainClass.equals(mapping.domainClass()) ){
+                return mapping;
+            }
+        }
+        return null;
+    }
+
 
     public Class<?> findDomainByCreateType(Class<?> type) {
         return findDomainByMappingType(type, MappingType.CREATE);

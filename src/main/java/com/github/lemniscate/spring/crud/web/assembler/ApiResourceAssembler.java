@@ -1,7 +1,7 @@
 package com.github.lemniscate.spring.crud.web.assembler;
 
-import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMapping;
 import com.github.lemniscate.spring.crud.mapping.ApiResourceMapping;
+import com.github.lemniscate.spring.crud.mapping.ApiResourceControllerHandlerMapping;
 import com.github.lemniscate.spring.jsonviews.struct.BaseViewResource;
 import lombok.Getter;
 import lombok.Setter;
