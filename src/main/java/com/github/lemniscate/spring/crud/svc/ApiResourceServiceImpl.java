@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,6 +35,7 @@ public class ApiResourceServiceImpl<ID extends Serializable, E extends Identifia
     protected ApiResourceRepository<ID, E> repo;
 
     @Inject
+    @Qualifier("mvcConversionService")
     protected ConversionService conversionService;
 
     @Inject

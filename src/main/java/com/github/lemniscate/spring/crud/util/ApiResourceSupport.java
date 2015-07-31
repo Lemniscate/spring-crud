@@ -2,6 +2,7 @@ package com.github.lemniscate.spring.crud.util;
 
 import com.github.lemniscate.spring.crud.svc.ApiResourceServices;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 public class ApiResourceSupport {
 
     @Inject
+    @Qualifier("mvcConversionService")
     protected ConversionService conversionService;
 
     @Inject

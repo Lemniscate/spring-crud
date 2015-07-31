@@ -13,7 +13,7 @@
 
     <groupId>com.github.lemniscate.spring</groupId>
     <artifactId>spring-crud</artifactId>
-    <version>0.1.19-SNAPSHOT</version>
+    <version>0.1.26-SNAPSHOT</version>
 
     <properties>
         <spring.version>4.1.3.RELEASE</spring.version>
@@ -109,12 +109,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
         </dependency>
 
         <dependency>
@@ -144,6 +138,7 @@
         </dependency>
     </dependencies>
 
+
     <build>
         <plugins>
             <plugin>
@@ -168,5 +163,18 @@
         </plugins>
     </build>
 
+
+    <repositories>
+        <repository>
+            <id>lemniscate-repo</id>
+            <url>https://github.com/lemniscate/maven-repo/raw/master/releases</url>
+        </repository>
+        <repository>
+            <id>lemniscate-snapshot-repo</id>
+            <url>https://github.com/lemniscate/maven-repo/raw/master/snapshots</url>
+            <snapshots>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
