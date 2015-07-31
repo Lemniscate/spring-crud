@@ -13,7 +13,6 @@ import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssembler;
 import com.github.lemniscate.spring.crud.web.assembler.ApiResourceAssemblers;
 import com.github.lemniscate.spring.crud.web.assembler.IApiResourceAssembler;
 import com.github.lemniscate.util.bytecode.JavassistUtil;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
@@ -295,8 +294,4 @@ public class ApiResourcesPostProcessor implements
         }
         return cache.get(name);
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 71b04cb1464dbbec72e0f3ad870202a6d4e03ade
